@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GHOST</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -37,6 +36,14 @@
       <textarea id="messageBox" placeholder="Enter encrypted message..."></textarea>
       <button onclick="sendMessage()">Send</button>
       <button class="nuke" onclick="nuclearPurge()">NUKE</button>
+
+      <hr />
+      <h4>New Real-Time Messaging</h4>
+      <input id="toUser" placeholder="Recipient name" />
+      <input id="messageInput" placeholder="Type a message" />
+      <button onclick="sendMessageTo()">Send Encrypted</button>
+      <div id="messageThread"></div>
+
       <div id="messageLog"></div>
     </div>
 
@@ -56,9 +63,12 @@
         <button type="submit">Search</button>
       </form>
     </div>
-
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js" type="module"></script>
+  <script>
+    loadMessages(); // Loads Firebase thread on page open
+  </script>
+
 </body>
 </html>
