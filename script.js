@@ -87,4 +87,40 @@ function nuclearPurge() {
 // Spyware/Jailbreak check (basic simulation)
 if (/Cydia|Frida|substrate/i.test(navigator.userAgent)) {
   alert(`[SECURITY] ${localStorage.getItem("ghostName")} — Jailbreak/Root risk detected`);
+}async function sendMessage() {
+  const sender = localStorage.getItem("ghostName");
+  const receiver = document.getElementById("toUser").value;
+  const message = document.getElementById("messageInput").value;
+  const timestamp = new Date();
+
+  if (!receiver || !message) return alert("Fill out all fields");
+
+  try {
+    await addDoc(collection(db, "messages"), {
+      sender,
+      receiver,
+      message,
+      timestamp
+    });
+    document.getElementById("messageInput").value = "";
+  } catch (e) {
+    console.error("Error sending message: ", e);
+  }
+}function loadMessages() {
+  const q = query(collection(db, "messages"), orderBy("timestamp"));
+  onSnapshot(q, (snapshot) => {
+    const thread = document.getElementById("messageThread");
+    thread.innerHTML = "";
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (
+        (data.sender === localStorage.getItem("ghostName") && data.receiver === document.getElementById("toUser").value) ||
+        (data.receiver === localStorage.getItem("ghostName") && data.sender === document.getElementById("toUser").value)
+      ) {
+        const msg = document.createElement("div");
+        msg.textContent = `${data.sender}: ${data.message}`;
+        thread.appendChild(msg);
+      }
+    });
+  });
 }
