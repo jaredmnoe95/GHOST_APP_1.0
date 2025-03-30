@@ -1,4 +1,18 @@
-let pin, codeName;
+// Firebase SDK setup
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAwH_u_8qK2K_jbrm2_Pcp5UuYYUHfG_w",
+  authDomain: "ghost-app-fa2b4.firebaseapp.com",
+  projectId: "ghost-app-fa2b4",
+  storageBucket: "ghost-app-fa2b4.appspot.com",
+  messagingSenderId: "63344368978",
+  appId: "1:63344368978:web:0aed1c03e6f06edb2fae8b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);let pin, codeName;
 let failCount = 0;
 let messages = [];
 
