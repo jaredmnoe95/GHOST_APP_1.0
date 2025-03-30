@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebas
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAwH_u_8qK2K_jbrm2_Pcp5UuYYUHfG_w",
+  apiKey: "AIzaSyAWH_u_8qK2K_jbrm2_Pcp5UyUYUHG_w",
   authDomain: "ghost-app-fa2b4.firebaseapp.com",
   projectId: "ghost-app-fa2b4",
   storageBucket: "ghost-app-fa2b4.appspot.com",
@@ -12,7 +12,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);let pin, codeName;
+const db = getFirestore(app);
+let pin, codeName;
 let failCount = 0;
 let messages = [];
 
@@ -20,7 +21,7 @@ function saveSetup() {
   codeName = document.getElementById("codeName").value;
   pin = document.getElementById("setPIN").value;
   if (pin.length !== 4 || !codeName) return alert("Set a 4-digit PIN and code name.");
-  localStorage.setItem("ghostPin", pin);
+  localStorage.setItem("ghostPIN", pin);
   localStorage.setItem("ghostName", codeName);
   document.getElementById("setup").style.display = "none";
   document.getElementById("login").style.display = "block";
@@ -28,7 +29,7 @@ function saveSetup() {
 
 function verifyPIN() {
   const input = document.getElementById("pinInput").value;
-  const realPIN = localStorage.getItem("ghostPin");
+  const realPIN = localStorage.getItem("ghostPIN");
   const status = document.getElementById("loginStatus");
 
   if (input === realPIN) {
@@ -38,9 +39,9 @@ function verifyPIN() {
     openApp(true); // spoof
   } else {
     failCount++;
-    if (failCount === 2) alert(`[SECURITY] ${localStorage.getItem("ghostName")} — 2 failed attempts`);
+    if (failCount === 2) alert(`[SECURITY] ${localStorage.getItem("ghostName")} – 2 failed attempts`);
     if (failCount >= 5) {
-      alert(`[SECURITY] ${localStorage.getItem("ghostName")} — Spoof Mode Activated`);
+      alert(`[SECURITY] ${localStorage.getItem("ghostName")} – Spoof Mode Activated`);
       openApp(true); // force spoof
     } else {
       status.innerText = "Incorrect PIN.";
@@ -54,6 +55,8 @@ function openApp(spoof = false) {
   document.getElementById("userTag").innerText = `Welcome, ${localStorage.getItem("ghostName")}`;
   if (spoof) {
     document.getElementById("messaging").innerHTML = "<p>Secure messaging unavailable.</p>";
+  } else {
+    loadMessages(); // FIXED: load real messages on real login
   }
 }
 
@@ -86,8 +89,10 @@ function nuclearPurge() {
 
 // Spyware/Jailbreak check (basic simulation)
 if (/Cydia|Frida|substrate/i.test(navigator.userAgent)) {
-  alert(`[SECURITY] ${localStorage.getItem("ghostName")} — Jailbreak/Root risk detected`);
-}async function sendMessage() {
+  alert(`[SECURITY] ${localStorage.getItem("ghostName")} – Jailbreak/Root risk detected`);
+}
+
+async function sendCloudMessage() {
   const sender = localStorage.getItem("ghostName");
   const receiver = document.getElementById("toUser").value;
   const message = document.getElementById("messageInput").value;
@@ -106,7 +111,9 @@ if (/Cydia|Frida|substrate/i.test(navigator.userAgent)) {
   } catch (e) {
     console.error("Error sending message: ", e);
   }
-}function loadMessages() {
+}
+
+function loadMessages() {
   const q = query(collection(db, "messages"), orderBy("timestamp"));
   onSnapshot(q, (snapshot) => {
     const thread = document.getElementById("messageThread");
