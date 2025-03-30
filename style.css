@@ -1,0 +1,30 @@
+body {
+  background: #000;
+  color: #fff;
+  font-family: monospace;
+  padding: 20px;
+  text-align: center;
+}
+input, button, textarea {
+  padding: 10px;
+  margin: 10px;
+  font-size: 16px;
+  width: 80%;
+  max-width: 300px;
+}
+button.nuke {
+  background: red;
+  color: white;
+  font-weight: bold;
+}
+.tab {
+  display: none;
+  margin-top: 20px;
+}
+#nav {
+  margin: 20px 0;
+}
+textarea {
+  width: 90%;
+  height: 100px;
+}
