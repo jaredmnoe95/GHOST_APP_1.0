@@ -1,1 +1,64 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GHOST</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="setup">
+    <h2>Set Up Ghost Access</h2>
+    <input type="text" id="codeName" placeholder="Enter your code name" />
+    <input type="password" id="setPIN" placeholder="Set 4-digit PIN" maxlength="4" />
+    <button onclick="saveSetup()">Save & Continue</button>
+  </div>
+
+  <div id="login" style="display:none;">
+    <h2>Enter PIN</h2>
+    <input type="password" id="pinInput" maxlength="4" />
+    <button onclick="verifyPIN()">Login</button>
+    <p id="loginStatus"></p>
+  </div>
+
+  <div id="appUI" style="display:none;">
+    <h2 id="userTag">Ghost Access Granted</h2>
+
+    <div id="nav">
+      <button onclick="showTab('messaging')">Messages</button>
+      <button onclick="showTab('alerts')">Security Alerts</button>
+      <button onclick="showTab('search')">Private Search</button>
+    </div>
+
+    <div class="tab" id="messaging">
+      <h3>Encrypted Messaging</h3>
+      <textarea id="messageBox" placeholder="Enter encrypted message..."></textarea>
+      <button onclick="sendMessage()">Send</button>
+      <button class="nuke" onclick="nuclearPurge()">NUKE</button>
+      <div id="messageLog"></div>
+    </div>
+
+    <div class="tab" id="alerts">
+      <h3>Ghost Security Notifications</h3>
+      <ul>
+        <li>Malware/Spyware Detected (if applicable)</li>
+        <li>Failed login attempts</li>
+        <li>User actions (nuke, spoof, etc.)</li>
+      </ul>
+    </div>
+
+    <div class="tab" id="search">
+      <h3>Anonymous Web Search</h3>
+      <form target="_blank" action="https://duckduckgo.com/">
+        <input type="text" name="q" placeholder="Search DuckDuckGo..." />
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
