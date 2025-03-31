@@ -1,108 +1,107 @@
-// Firebase SDK setup
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+// Firebase Setup
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
 
-// Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDkWIOJ7DaQ7pozupt84f3j6JbCPKdYZnU",
+  authDomain: "ghost-8921c.firebaseapp.com",
+  projectId: "ghost-8921c",
+  storageBucket: "ghost-8921c.firebasestorage.app",
+  messagingSenderId: "282650978484",
+  appId: "1:282650978484:web:e4c1ccb63719eb04c78fe1",
+  measurementId: "G-P1HW9LHPR4"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 const db = getDatabase(app);
 
-// Save user info to localStorage for login
-function saveSetup() {
-  const codeName = document.getElementById("codeName").value;
-  const pin = document.getElementById("setPIN").value;
-
-  if (pin.length !== 4 || !codeName) {
-    return alert("Set a 4-digit PIN and code name.");
-  }
-
-  // Save PIN and code name to localStorage (for login purposes)
-  localStorage.setItem("ghostPIN", pin);
-  localStorage.setItem("ghostName", codeName);
-  
-  console.log("Saved PIN:", pin);
-  console.log("Saved Code Name:", codeName);
-
-  // Hide the setup form and show the login form
-  document.getElementById("setup").style.display = "none";
-  document.getElementById("login").style.display = "block";
-}
-
-// Verify PIN and proceed to the app
-function verifyPIN() {
-  const input = document.getElementById("pinInput").value;
-  const realPIN = localStorage.getItem("ghostPIN");
-  const status = document.getElementById("loginStatus");
-
-  if (input === realPIN) {
-    openApp();
-  } else if (input === realPIN.split("").reverse().join("")) {
-    status.innerText = "Ghost Spoof Mode Enabled.";
-    openApp(true);
+// Function to save code name
+function saveCodeName() {
+  const codeName = document.getElementById('codeName').value;
+  const userTag = document.getElementById('userTag');
+  if (codeName) {
+    userTag.textContent = `Ghost Access Granted, ${codeName}`;
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('pinScreen').style.display = 'block';
   } else {
-    status.innerText = "Incorrect PIN.";
+    alert("Please enter a code name.");
   }
 }
 
-// Open the app after login
-function openApp(spoof = false) {
-  document.getElementById("login").style.display = "none";
-  document.getElementById("appUI").style.display = "block";
-  document.getElementById("userTag").innerText = `Welcome, ${localStorage.getItem("ghostName")}`;
-
-  if (spoof) {
-    document.getElementById("messaging").innerHTML = "<p>Secure messaging unavailable.</p>";
+// Function to save PIN and continue
+function savePIN() {
+  const pin = document.getElementById('setPIN').value;
+  if (pin.length === 4) {
+    const userData = {
+      codeName: document.getElementById('codeName').value,
+      pin: pin
+    };
+    const newUserRef = push(ref(db, 'users/'));
+    set(newUserRef, userData);
+    document.getElementById('pinScreen').style.display = 'none';
+    document.getElementById('appUI').style.display = 'block';
   } else {
-    loadMessages();
+    alert("Please enter a 4-digit PIN.");
   }
 }
 
-// Handle sending messages
+// Function to show the selected tab
+function showTab(tabName) {
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => tab.style.display = 'none');
+  document.getElementById(tabName).style.display = 'block';
+}
+
+// Function to send a message
 function sendMessage() {
-  const sender = localStorage.getItem("ghostName");
-  const receiver = document.getElementById("toUser").value;
-  const message = document.getElementById("messageInput").value;
-  const timestamp = new Date().toISOString();
-
-  if (!receiver || !message) return alert("Fill out all fields");
-
-  const msgRef = ref(db, "messages");
-  push(msgRef, {
-    sender,
-    receiver,
-    message,
-    timestamp
-  });
-
-  document.getElementById("messageInput").value = "";
+  const message = document.getElementById('messageBox').value;
+  if (message) {
+    const messageThread = document.getElementById('messageThread');
+    const messageElement = document.createElement('p');
+    messageElement.textContent = message;
+    messageThread.appendChild(messageElement);
+    document.getElementById('messageBox').value = ''; // Clear message input
+  }
 }
 
-// Load messages from Firebase
-function loadMessages() {
-  const thread = document.getElementById("messageThread");
-  thread.innerHTML = "";
-  const ghost = localStorage.getItem("ghostName");
+// Function to clear messages with Nuke
+function nuclearPurge() {
+  const messageThread = document.getElementById('messageThread');
+  messageThread.innerHTML = ''; // Clear all messages
+}
 
-  const msgRef = ref(db, "messages");
-  onChildAdded(msgRef, (snapshot) => {
+// Function for sending real-time encrypted messages
+function sendMessageTo() {
+  const recipient = document.getElementById('toUser').value;
+  const message = document.getElementById('messageInput').value;
+  if (recipient && message) {
+    const newMessageRef = push(ref(db, 'messages/'));
+    set(newMessageRef, {
+      recipient: recipient,
+      message: message
+    });
+    document.getElementById('toUser').value = ''; // Clear recipient
+    document.getElementById('messageInput').value = ''; // Clear message
+  }
+}
+
+// Function to fetch real-time messages
+function fetchMessages() {
+  const messagesRef = ref(db, 'messages/');
+  onValue(messagesRef, (snapshot) => {
     const data = snapshot.val();
-    if (
-      (data.sender === ghost && data.receiver === document.getElementById("toUser").value) ||
-      (data.receiver === ghost && data.sender === document.getElementById("toUser").value)
-    ) {
-      const msg = document.createElement("div");
-      msg.textContent = `${data.sender}: ${data.message}`;
-      thread.appendChild(msg);
+    const messageThread = document.getElementById('messageThread');
+    messageThread.innerHTML = ''; // Clear old messages
+    for (const key in data) {
+      const message = data[key].message;
+      const messageElement = document.createElement('p');
+      messageElement.textContent = message;
+      messageThread.appendChild(messageElement);
     }
   });
 }
+
+// Call fetchMessages every 5 seconds for real-time updates
+setInterval(fetchMessages, 5000);
