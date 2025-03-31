@@ -1,30 +1,113 @@
+/* General Body Styling */
 body {
   background: #000;
   color: #fff;
   font-family: monospace;
   padding: 20px;
   text-align: center;
+  margin: 0;
 }
+
+/* Inputs, Buttons, Textareas */
 input, button, textarea {
   padding: 10px;
   margin: 10px;
   font-size: 16px;
   width: 80%;
   max-width: 300px;
+  border-radius: 5px;
+  border: 1px solid #fff;
+  background-color: #222;
+  color: #fff;
 }
+
+button {
+  background-color: #444;
+  color: white;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #666;
+}
+
 button.nuke {
   background: red;
   color: white;
   font-weight: bold;
 }
+
+button.nuke:hover {
+  background-color: darkred;
+}
+
+/* Tab Menu */
+#nav {
+  margin: 20px 0;
+}
+
+#nav button {
+  background-color: #333;
+  margin: 5px;
+  padding: 12px;
+  width: 100px;
+}
+
+#nav button:hover {
+  background-color: #444;
+}
+
+/* Tabs Styling */
 .tab {
   display: none;
   margin-top: 20px;
 }
-#nav {
-  margin: 20px 0;
+
+/* Message Section */
+#messageLog {
+  margin-top: 20px;
+  border-top: 2px solid #fff;
+  padding-top: 20px;
 }
-textarea {
-  width: 90%;
-  height: 100px;
+
+#messageLog div {
+  background-color: #333;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+  word-wrap: break-word;
+}
+
+#messageThread {
+  margin-top: 10px;
+  padding: 10px;
+  max-height: 400px;
+  overflow-y: scroll;
+}
+
+/* Placeholder Text */
+::placeholder {
+  color: #bbb;
+}
+
+/* Setup and Login Forms */
+#setup, #login {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+h2, h3, h4 {
+  font-family: monospace;
+  font-weight: bold;
+}
+
+/* Mobile Friendly Adjustments */
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  #nav button {
+    width: 80px;
+  }
 }
