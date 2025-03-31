@@ -1,35 +1,154 @@
-body {
-  background: #000;
-  color: #fff;
-  font-family: monospace;
-  padding: 20px;
-  text-align: center;
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-input, button, textarea {
-  padding: 10px;
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #2a2a2a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 20px;
+  background-image: url('ghost_image.png'); /* Ensure you add your ghost image here */
+  background-size: cover;
+}
+
+h2, h3 {
+  font-size: 1.5em;
+  text-align: center;
+  margin: 10px 0;
+}
+
+/* Input Fields and Buttons */
+input, button {
+  padding: 12px;
+  font-size: 1em;
   margin: 10px;
-  font-size: 16px;
   width: 80%;
   max-width: 300px;
+  background-color: #333;
+  border: none;
+  border-radius: 5px;
+  color: white;
+}
+
+input[type="password"], input[type="text"] {
+  background-color: #444;
+}
+
+button {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #555;
 }
 
 button.nuke {
-  background: red;
+  background-color: red;
   color: white;
-  font-weight: bold;
+}
+
+button.nuke:hover {
+  background-color: darkred;
+}
+
+/* Container and Layout */
+#setup, #pinScreen, #appUI {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+#pinScreen, #appUI {
+  display: none;
+}
+
+/* Tabs */
+#nav {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+#nav button {
+  background-color: #333;
+  color: white;
+  width: 100px;
 }
 
 .tab {
   display: none;
   margin-top: 20px;
-}
-
-#nav {
-  margin: 20px 0;
+  width: 100%;
 }
 
 textarea {
   width: 90%;
   height: 100px;
+  border-radius: 5px;
+  background-color: #444;
+  border: none;
+  color: white;
+  padding: 10px;
+  font-size: 1em;
+}
+
+#messageThread {
+  width: 90%;
+  max-width: 300px;
+  margin-top: 10px;
+  background-color: #333;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+/* Alerts & Message Logs */
+#alertsLog {
+  list-style: none;
+  padding: 0;
+}
+
+#alertsLog li {
+  background-color: #444;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Form & Search Box */
+form {
+  margin-top: 20px;
+}
+
+form input {
+  padding: 12px;
+  margin: 10px 0;
+  width: 80%;
+  max-width: 300px;
+  background-color: #444;
+  border: none;
+  border-radius: 5px;
+  color: white;
+}
+
+form button {
+  width: 100%;
+  background-color: #333;
+  color: white;
+}
+
+form button:hover {
+  background-color: #555;
 }
