@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
-// Firebase configuration from your Firebase console
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAWH_u_8qK2K_jbrn2_Pcp5UyUYUHFg_w",
   authDomain: "ghost-app-fa2b4.firebaseapp.com",
@@ -17,13 +17,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Variables to track setup and messages
 let failCount = 0;
 let messages = [];
 
+// Save setup data to localStorage
 function saveSetup() {
   const codeName = document.getElementById("codeName").value;
   const pin = document.getElementById("setPIN").value;
-  if (pin.length !== 4 || !codeName) return alert("Set a 4-digit PIN and code name.");
+
+  if (pin.length !== 4 || !codeName) {
+    return alert("Set a 4-digit PIN and code name.");
+  }
 
   localStorage.setItem("ghostPIN", pin);
   localStorage.setItem("ghostName", codeName);
@@ -31,6 +36,7 @@ function saveSetup() {
   document.getElementById("login").style.display = "block";
 }
 
+// Verify PIN and proceed
 function verifyPIN() {
   const input = document.getElementById("pinInput").value;
   const realPIN = localStorage.getItem("ghostPIN");
@@ -46,6 +52,7 @@ function verifyPIN() {
   }
 }
 
+// Open the app UI after login
 function openApp(spoof = false) {
   document.getElementById("login").style.display = "none";
   document.getElementById("appUI").style.display = "block";
@@ -58,6 +65,13 @@ function openApp(spoof = false) {
   }
 }
 
+// Show different tabs (Messaging, Alerts, Search)
+function showTab(tabName) {
+  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
+  document.getElementById(tabName).style.display = "block";
+}
+
+// Send an encrypted message
 function sendMessage() {
   const sender = localStorage.getItem("ghostName");
   const receiver = document.getElementById("toUser").value;
@@ -77,6 +91,7 @@ function sendMessage() {
   document.getElementById("messageInput").value = "";
 }
 
+// Load all messages
 function loadMessages() {
   const thread = document.getElementById("messageThread");
   thread.innerHTML = "";
@@ -94,4 +109,13 @@ function loadMessages() {
       thread.appendChild(msg);
     }
   });
+}
+
+// Nuke all messages
+function nuclearPurge() {
+  if (confirm("Purge all encrypted messages for all users?")) {
+    messages = [];
+    updateLog();
+    alert("All messages have been purged.");
+  }
 }
