@@ -8,6 +8,7 @@
 </head>
 <body>
 
+  <!-- Set Up Ghost Access -->
   <div id="setup">
     <h2>Set Up Ghost Access</h2>
     <input type="text" id="codeName" placeholder="Enter your code name" />
@@ -15,6 +16,7 @@
     <button onclick="saveSetup()">Save & Continue</button>
   </div>
 
+  <!-- Login -->
   <div id="login" style="display:none;">
     <h2>Enter PIN</h2>
     <input type="password" id="pinInput" maxlength="4" />
@@ -22,9 +24,9 @@
     <p id="loginStatus"></p>
   </div>
 
+  <!-- App UI after login -->
   <div id="appUI" style="display:none;">
     <h2 id="userTag">Ghost Access Granted</h2>
-
     <div id="nav">
       <button onclick="showTab('messaging')">Messages</button>
       <button onclick="showTab('alerts')">Security Alerts</button>
@@ -36,14 +38,12 @@
       <textarea id="messageBox" placeholder="Enter encrypted message..."></textarea>
       <button onclick="sendMessage()">Send</button>
       <button class="nuke" onclick="nuclearPurge()">NUKE</button>
-
       <hr />
       <h4>New Real-Time Messaging</h4>
       <input id="toUser" placeholder="Recipient name" />
       <input id="messageInput" placeholder="Type a message" />
-      <button onclick="sendMessage()">Send Encrypted</button>
+      <button onclick="sendMessageTo()">Send Encrypted</button>
       <div id="messageThread"></div>
-
       <div id="messageLog"></div>
     </div>
 
@@ -65,10 +65,6 @@
     </div>
   </div>
 
-  <script src="script.js" type="module"></script>
-  <script>
-    loadMessages(); // Loads Firebase thread on page open
-  </script>
-
+  <script src="script.js"></script>
 </body>
 </html>
