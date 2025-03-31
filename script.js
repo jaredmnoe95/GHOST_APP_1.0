@@ -1,11 +1,9 @@
+// Firebase SDK setup
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import {
-  getDatabase, ref, push, onChildAdded
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
-// Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyAWhU_8qK2K_jbrn2_Pcp5UyVYUHFg_w",
+  apiKey: "AIzaSyAWH_u_8qK2K_jbrn2_Pcp5UyUYUHFg_w",
   authDomain: "ghost-app-fa2b4.firebaseapp.com",
   databaseURL: "https://ghost-app-fa2b4-default-rtdb.firebaseio.com",
   projectId: "ghost-app-fa2b4",
@@ -17,12 +15,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let failCount = 0;
-
 function saveSetup() {
   const codeName = document.getElementById("codeName").value;
   const pin = document.getElementById("setPIN").value;
   if (pin.length !== 4 || !codeName) return alert("Set a 4-digit PIN and code name.");
+
   localStorage.setItem("ghostPIN", pin);
   localStorage.setItem("ghostName", codeName);
   document.getElementById("setup").style.display = "none";
@@ -40,14 +37,7 @@ function verifyPIN() {
     status.innerText = "Ghost Spoof Mode Enabled.";
     openApp(true);
   } else {
-    failCount++;
-    if (failCount === 2) alert(`[SECURITY] ${localStorage.getItem("ghostName")} – 2 failed attempts`);
-    if (failCount >= 5) {
-      alert(`[SECURITY] ${localStorage.getItem("ghostName")} – Spoof Mode Activated`);
-      openApp(true);
-    } else {
-      status.innerText = "Incorrect PIN.";
-    }
+    status.innerText = "Incorrect PIN.";
   }
 }
 
@@ -55,21 +45,15 @@ function openApp(spoof = false) {
   document.getElementById("login").style.display = "none";
   document.getElementById("appUI").style.display = "block";
   document.getElementById("userTag").innerText = `Welcome, ${localStorage.getItem("ghostName")}`;
+
   if (spoof) {
     document.getElementById("messaging").innerHTML = "<p>Secure messaging unavailable.</p>";
   } else {
-    document.getElementById("messaging").innerHTML = `
-      <div>
-        <input id="toUser" placeholder="Send to...">
-        <input id="messageInput" placeholder="Type a message...">
-        <button onclick="sendMessage()">Send</button>
-        <div id="messageThread"></div>
-      </div>`;
     loadMessages();
   }
 }
 
-async function sendMessage() {
+function sendMessage() {
   const sender = localStorage.getItem("ghostName");
   const receiver = document.getElementById("toUser").value;
   const message = document.getElementById("messageInput").value;
@@ -77,31 +61,28 @@ async function sendMessage() {
 
   if (!receiver || !message) return alert("Fill out all fields");
 
-  try {
-    await push(ref(db, "messages"), {
-      sender,
-      receiver,
-      message,
-      timestamp
-    });
-    document.getElementById("messageInput").value = "";
-  } catch (e) {
-    console.error("Error sending message:", e);
-  }
+  const msgRef = ref(db, "messages");
+  push(msgRef, {
+    sender,
+    receiver,
+    message,
+    timestamp
+  });
+
+  document.getElementById("messageInput").value = "";
 }
 
 function loadMessages() {
-  const ghost = localStorage.getItem("ghostName");
   const thread = document.getElementById("messageThread");
   thread.innerHTML = "";
+  const ghost = localStorage.getItem("ghostName");
 
-  onChildAdded(ref(db, "messages"), (snapshot) => {
+  const msgRef = ref(db, "messages");
+  onChildAdded(msgRef, (snapshot) => {
     const data = snapshot.val();
-    const toUser = document.getElementById("toUser").value;
-
     if (
-      (data.sender === ghost && data.receiver === toUser) ||
-      (data.receiver === ghost && data.sender === toUser)
+      (data.sender === ghost && data.receiver === document.getElementById("toUser").value) ||
+      (data.receiver === ghost && data.sender === document.getElementById("toUser").value)
     ) {
       const msg = document.createElement("div");
       msg.textContent = `${data.sender}: ${data.message}`;
@@ -109,8 +90,3 @@ function loadMessages() {
     }
   });
 }
-
-// Expose setup/verify for button actions
-window.saveSetup = saveSetup;
-window.verifyPIN = verifyPIN;
-window.sendMessage = sendMessage;
