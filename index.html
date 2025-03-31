@@ -1,30 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GHOST</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghost Web App</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Set Up Ghost Access -->
+  <!-- Setup Section -->
   <div id="setup">
-    <h2>Set Up Ghost Access</h2>
+    <h2>Welcome to Ghost App</h2>
     <input type="text" id="codeName" placeholder="Enter your code name" />
-    <input type="password" id="setPIN" placeholder="Set 4-digit PIN" maxlength="4" />
-    <button onclick="saveSetup()">Save & Continue</button>
+    <button onclick="saveCodeName()">Next</button>
   </div>
 
-  <!-- Login -->
-  <div id="login" style="display:none;">
-    <h2>Enter PIN</h2>
-    <input type="password" id="pinInput" maxlength="4" />
-    <button onclick="verifyPIN()">Login</button>
-    <p id="loginStatus"></p>
+  <!-- PIN Setup Section -->
+  <div id="pinScreen" style="display:none;">
+    <h2>Set your 4-Digit PIN</h2>
+    <input type="password" id="setPIN" maxlength="4" placeholder="Set 4-digit PIN" />
+    <button onclick="savePIN()">Save & Continue</button>
   </div>
 
-  <!-- App UI after login -->
+  <!-- Main App UI -->
   <div id="appUI" style="display:none;">
     <h2 id="userTag">Ghost Access Granted</h2>
     <div id="nav">
@@ -32,30 +30,29 @@
       <button onclick="showTab('alerts')">Security Alerts</button>
       <button onclick="showTab('search')">Private Search</button>
     </div>
-
+  
     <div class="tab" id="messaging">
       <h3>Encrypted Messaging</h3>
       <textarea id="messageBox" placeholder="Enter encrypted message..."></textarea>
       <button onclick="sendMessage()">Send</button>
       <button class="nuke" onclick="nuclearPurge()">NUKE</button>
-      <hr />
-      <h4>New Real-Time Messaging</h4>
-      <input id="toUser" placeholder="Recipient name" />
-      <input id="messageInput" placeholder="Type a message" />
-      <button onclick="sendMessageTo()">Send Encrypted</button>
-      <div id="messageThread"></div>
-      <div id="messageLog"></div>
     </div>
-
+  
+    <hr>
+  
+    <h3>New Real-Time Messaging</h3>
+    <input id="toUser" placeholder="Recipient name" />
+    <input id="messageInput" placeholder="Type a message" />
+    <button onclick="sendMessageTo()">Send Encrypted</button>
+    <div id="messageThread"></div>
+  
     <div class="tab" id="alerts">
       <h3>Ghost Security Notifications</h3>
-      <ul>
-        <li>Malware/Spyware Detected (if applicable)</li>
-        <li>Failed login attempts</li>
-        <li>User actions (nuke, spoof, etc.)</li>
+      <ul id="alertsLog">
+        <!-- Real-time alerts will be added here -->
       </ul>
     </div>
-
+  
     <div class="tab" id="search">
       <h3>Anonymous Web Search</h3>
       <form target="_blank" action="https://duckduckgo.com/">
@@ -65,6 +62,117 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- Firebase Configuration Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+    import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+  
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkWIOJ7DaQ7pozupt84f3j6JbCPKdYZnU",
+      authDomain: "ghost-8921c.firebaseapp.com",
+      projectId: "ghost-8921c",
+      storageBucket: "ghost-8921c.firebasestorage.app",
+      messagingSenderId: "282650978484",
+      appId: "1:282650978484:web:e4c1ccb63719eb04c78fe1",
+      measurementId: "G-P1HW9LHPR4"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getDatabase(app);
+
+    // Function to save code name
+    function saveCodeName() {
+      const codeName = document.getElementById('codeName').value;
+      const userTag = document.getElementById('userTag');
+      if (codeName) {
+        userTag.textContent = `Ghost Access Granted, ${codeName}`;
+        document.getElementById('setup').style.display = 'none';
+        document.getElementById('pinScreen').style.display = 'block';
+      } else {
+        alert("Please enter a code name.");
+      }
+    }
+
+    // Function to save PIN and continue
+    function savePIN() {
+      const pin = document.getElementById('setPIN').value;
+      if (pin.length === 4) {
+        const userData = {
+          codeName: document.getElementById('codeName').value,
+          pin: pin
+        };
+        const newUserRef = push(ref(db, 'users/'));
+        set(newUserRef, userData);
+        document.getElementById('pinScreen').style.display = 'none';
+        document.getElementById('appUI').style.display = 'block';
+      } else {
+        alert("Please enter a 4-digit PIN.");
+      }
+    }
+
+    // Function to show the selected tab
+    function showTab(tabName) {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => tab.style.display = 'none');
+      document.getElementById(tabName).style.display = 'block';
+    }
+
+    // Function to send a message
+    function sendMessage() {
+      const message = document.getElementById('messageBox').value;
+      if (message) {
+        const messageThread = document.getElementById('messageThread');
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        messageThread.appendChild(messageElement);
+        document.getElementById('messageBox').value = ''; // Clear message input
+      }
+    }
+
+    // Function to clear messages with Nuke
+    function nuclearPurge() {
+      const messageThread = document.getElementById('messageThread');
+      messageThread.innerHTML = ''; // Clear all messages
+    }
+
+    // Function for sending real-time encrypted messages
+    function sendMessageTo() {
+      const recipient = document.getElementById('toUser').value;
+      const message = document.getElementById('messageInput').value;
+      if (recipient && message) {
+        const newMessageRef = push(ref(db, 'messages/'));
+        set(newMessageRef, {
+          recipient: recipient,
+          message: message
+        });
+        document.getElementById('toUser').value = ''; // Clear recipient
+        document.getElementById('messageInput').value = ''; // Clear message
+      }
+    }
+
+    // Function to fetch real-time messages
+    function fetchMessages() {
+      const messagesRef = ref(db, 'messages/');
+      onValue(messagesRef, (snapshot) => {
+        const data = snapshot.val();
+        const messageThread = document.getElementById('messageThread');
+        messageThread.innerHTML = ''; // Clear old messages
+        for (const key in data) {
+          const message = data[key].message;
+          const messageElement = document.createElement('p');
+          messageElement.textContent = message;
+          messageThread.appendChild(messageElement);
+        }
+      });
+    }
+
+    // Call fetchMessages every 5 seconds for real-time updates
+    setInterval(fetchMessages, 5000);
+  </script>
+
+  <script src="script.js" type="module"></script>
+
 </body>
 </html>
