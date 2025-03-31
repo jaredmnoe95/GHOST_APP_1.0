@@ -1,10 +1,13 @@
-// Firebase SDK setup
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import {
+  getDatabase, ref, push, onChildAdded
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
+// Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyAWH_u_8qK2K_jbrm2_Pcp5UyUYUHG_w",
+  apiKey: "AIzaSyAWhU_8qK2K_jbrn2_Pcp5UyVYUHFg_w",
   authDomain: "ghost-app-fa2b4.firebaseapp.com",
+  databaseURL: "https://ghost-app-fa2b4-default-rtdb.firebaseio.com",
   projectId: "ghost-app-fa2b4",
   storageBucket: "ghost-app-fa2b4.appspot.com",
   messagingSenderId: "63344368978",
@@ -12,14 +15,13 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-let pin, codeName;
+const db = getDatabase(app);
+
 let failCount = 0;
-let messages = [];
 
 function saveSetup() {
-  codeName = document.getElementById("codeName").value;
-  pin = document.getElementById("setPIN").value;
+  const codeName = document.getElementById("codeName").value;
+  const pin = document.getElementById("setPIN").value;
   if (pin.length !== 4 || !codeName) return alert("Set a 4-digit PIN and code name.");
   localStorage.setItem("ghostPIN", pin);
   localStorage.setItem("ghostName", codeName);
@@ -36,13 +38,13 @@ function verifyPIN() {
     openApp();
   } else if (input === realPIN.split("").reverse().join("")) {
     status.innerText = "Ghost Spoof Mode Enabled.";
-    openApp(true); // spoof
+    openApp(true);
   } else {
     failCount++;
     if (failCount === 2) alert(`[SECURITY] ${localStorage.getItem("ghostName")} – 2 failed attempts`);
     if (failCount >= 5) {
       alert(`[SECURITY] ${localStorage.getItem("ghostName")} – Spoof Mode Activated`);
-      openApp(true); // force spoof
+      openApp(true);
     } else {
       status.innerText = "Incorrect PIN.";
     }
@@ -56,52 +58,27 @@ function openApp(spoof = false) {
   if (spoof) {
     document.getElementById("messaging").innerHTML = "<p>Secure messaging unavailable.</p>";
   } else {
-    loadMessages(); // FIXED: load real messages on real login
+    document.getElementById("messaging").innerHTML = `
+      <div>
+        <input id="toUser" placeholder="Send to...">
+        <input id="messageInput" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+        <div id="messageThread"></div>
+      </div>`;
+    loadMessages();
   }
 }
 
-function showTab(tabName) {
-  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
-  document.getElementById(tabName).style.display = "block";
-}
-
-function sendMessage() {
-  const input = document.getElementById("messageBox").value;
-  if (!input) return;
-  const encrypted = btoa(unescape(encodeURIComponent(input))); // basic local encoding
-  messages.push(encrypted);
-  updateLog();
-  document.getElementById("messageBox").value = "";
-}
-
-function updateLog() {
-  const log = document.getElementById("messageLog");
-  log.innerHTML = messages.map(msg => `<div>${decodeURIComponent(escape(atob(msg)))}</div>`).join("");
-}
-
-function nuclearPurge() {
-  if (confirm("Purge all encrypted messages for all users?")) {
-    messages = [];
-    updateLog();
-    alert(`[NUCLEAR] ${localStorage.getItem("ghostName")} triggered message purge.`);
-  }
-}
-
-// Spyware/Jailbreak check (basic simulation)
-if (/Cydia|Frida|substrate/i.test(navigator.userAgent)) {
-  alert(`[SECURITY] ${localStorage.getItem("ghostName")} – Jailbreak/Root risk detected`);
-}
-
-async function sendCloudMessage() {
+async function sendMessage() {
   const sender = localStorage.getItem("ghostName");
   const receiver = document.getElementById("toUser").value;
   const message = document.getElementById("messageInput").value;
-  const timestamp = new Date();
+  const timestamp = new Date().toISOString();
 
   if (!receiver || !message) return alert("Fill out all fields");
 
   try {
-    await addDoc(collection(db, "messages"), {
+    await push(ref(db, "messages"), {
       sender,
       receiver,
       message,
@@ -109,25 +86,31 @@ async function sendCloudMessage() {
     });
     document.getElementById("messageInput").value = "";
   } catch (e) {
-    console.error("Error sending message: ", e);
+    console.error("Error sending message:", e);
   }
 }
 
 function loadMessages() {
-  const q = query(collection(db, "messages"), orderBy("timestamp"));
-  onSnapshot(q, (snapshot) => {
-    const thread = document.getElementById("messageThread");
-    thread.innerHTML = "";
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      if (
-        (data.sender === localStorage.getItem("ghostName") && data.receiver === document.getElementById("toUser").value) ||
-        (data.receiver === localStorage.getItem("ghostName") && data.sender === document.getElementById("toUser").value)
-      ) {
-        const msg = document.createElement("div");
-        msg.textContent = `${data.sender}: ${data.message}`;
-        thread.appendChild(msg);
-      }
-    });
+  const ghost = localStorage.getItem("ghostName");
+  const thread = document.getElementById("messageThread");
+  thread.innerHTML = "";
+
+  onChildAdded(ref(db, "messages"), (snapshot) => {
+    const data = snapshot.val();
+    const toUser = document.getElementById("toUser").value;
+
+    if (
+      (data.sender === ghost && data.receiver === toUser) ||
+      (data.receiver === ghost && data.sender === toUser)
+    ) {
+      const msg = document.createElement("div");
+      msg.textContent = `${data.sender}: ${data.message}`;
+      thread.appendChild(msg);
+    }
   });
 }
+
+// Expose setup/verify for button actions
+window.saveSetup = saveSetup;
+window.verifyPIN = verifyPIN;
+window.sendMessage = sendMessage;
