@@ -4,24 +4,20 @@ import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/fi
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAWH_u_8qK2K_jbrn2_Pcp5UyUYUHFg_w",
-  authDomain: "ghost-app-fa2b4.firebaseapp.com",
-  databaseURL: "https://ghost-app-fa2b4-default-rtdb.firebaseio.com",
-  projectId: "ghost-app-fa2b4",
-  storageBucket: "ghost-app-fa2b4.appspot.com",
-  messagingSenderId: "63344368978",
-  appId: "1:63344368978:web:0aed1c03e6f06edb2fae8b"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Variables to track setup and messages
-let failCount = 0;
-let messages = [];
-
-// Save setup data to localStorage
+// Save user info to localStorage for login
 function saveSetup() {
   const codeName = document.getElementById("codeName").value;
   const pin = document.getElementById("setPIN").value;
@@ -30,13 +26,19 @@ function saveSetup() {
     return alert("Set a 4-digit PIN and code name.");
   }
 
+  // Save PIN and code name to localStorage (for login purposes)
   localStorage.setItem("ghostPIN", pin);
   localStorage.setItem("ghostName", codeName);
+  
+  console.log("Saved PIN:", pin);
+  console.log("Saved Code Name:", codeName);
+
+  // Hide the setup form and show the login form
   document.getElementById("setup").style.display = "none";
   document.getElementById("login").style.display = "block";
 }
 
-// Verify PIN and proceed
+// Verify PIN and proceed to the app
 function verifyPIN() {
   const input = document.getElementById("pinInput").value;
   const realPIN = localStorage.getItem("ghostPIN");
@@ -52,7 +54,7 @@ function verifyPIN() {
   }
 }
 
-// Open the app UI after login
+// Open the app after login
 function openApp(spoof = false) {
   document.getElementById("login").style.display = "none";
   document.getElementById("appUI").style.display = "block";
@@ -65,13 +67,7 @@ function openApp(spoof = false) {
   }
 }
 
-// Show different tabs (Messaging, Alerts, Search)
-function showTab(tabName) {
-  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
-  document.getElementById(tabName).style.display = "block";
-}
-
-// Send an encrypted message
+// Handle sending messages
 function sendMessage() {
   const sender = localStorage.getItem("ghostName");
   const receiver = document.getElementById("toUser").value;
@@ -91,7 +87,7 @@ function sendMessage() {
   document.getElementById("messageInput").value = "";
 }
 
-// Load all messages
+// Load messages from Firebase
 function loadMessages() {
   const thread = document.getElementById("messageThread");
   thread.innerHTML = "";
@@ -109,13 +105,4 @@ function loadMessages() {
       thread.appendChild(msg);
     }
   });
-}
-
-// Nuke all messages
-function nuclearPurge() {
-  if (confirm("Purge all encrypted messages for all users?")) {
-    messages = [];
-    updateLog();
-    alert("All messages have been purged.");
-  }
 }
